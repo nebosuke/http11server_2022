@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 
 public class Http11ProcessorTest {
-    
+
     @Test
     public void testParseRequest() {
         String wireProtocol = """
@@ -31,7 +31,7 @@ public class Http11ProcessorTest {
             Method readRequest = Http11Processor.class.getDeclaredMethod("readRequest");
             readRequest.setAccessible(true);
 
-            var processor = new Http11Processor(in, out);
+            var processor = new Http11Processor(in, out, null);
 
             Http11Processor.Http11Request request = (Http11Processor.Http11Request) readRequest.invoke(
                     processor);

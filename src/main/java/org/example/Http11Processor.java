@@ -72,18 +72,20 @@ public class Http11Processor {
         var responseHeaders = new StringBuilder();
         responseHeaders.append("HTTP/1.1 200 OK").append(CRLF);
         responseHeaders.append("Content-Type: ").append(contentType).append(CRLF);
+        responseHeaders.append("Transfer-Encoding: chunked").append(CRLF);
         responseHeaders.append(CRLF);
 
         out.write(responseHeaders.toString().getBytes(StandardCharsets.UTF_8));
 
         byte[] buf = new byte[1280];
-        try (FileInputStream fileIn = new FileInputStream(file)) {
+        try (var chunkedOutputStream = new ChunkedOutputStream(out);
+                FileInputStream fileIn = new FileInputStream(file)) {
             while (true) {
                 int len = fileIn.read(buf);
                 if (len < 0) {
                     break;
                 } else if (len > 0) {
-                    out.write(buf, 0, len);
+                    chunkedOutputStream.write(buf, 0, len);
                 }
             }
         }
