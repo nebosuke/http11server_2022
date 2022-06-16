@@ -50,7 +50,7 @@ public class App {
 
         int listenPort = 10080;
         try {
-            listenPort = Integer.parseInt(cmd.getOptionValue("port", "10080"));
+            listenPort = Integer.parseInt(cmd.getOptionValue("port", "12345"));
         } catch (NumberFormatException e) {
             printUsage(options);
         }
