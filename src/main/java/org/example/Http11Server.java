@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -29,7 +28,7 @@ public class Http11Server {
                 final Socket accepted = socket.accept();
                 threadPool.submit(() -> {
                     try {
-                        accepted.getOutputStream().write("Hello world".getBytes(StandardCharsets.UTF_8));
+                        new Http11Processor(accepted.getInputStream(), accepted.getOutputStream()).process();
                     } catch (IOException e) {
                         // TCP wire error throws IOException
                         // TODO error handling
