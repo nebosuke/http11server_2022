@@ -11,13 +11,13 @@ public class Http11Server {
 
     private final int listenPort;
 
-    private final String documentRoot;
+    private final FileResolver fileResolver;
 
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
     public Http11Server(int listenPort, String documentRoot) {
         this.listenPort = listenPort;
-        this.documentRoot = documentRoot;
+        this.fileResolver = new DocumentRootFileResolver(documentRoot);
     }
 
     public void start() throws IOException {
@@ -28,7 +28,8 @@ public class Http11Server {
                 final Socket accepted = socket.accept();
                 threadPool.submit(() -> {
                     try {
-                        new Http11Processor(accepted.getInputStream(), accepted.getOutputStream()).process();
+                        new Http11Processor(accepted.getInputStream(), accepted.getOutputStream(),
+                                fileResolver).process();
                     } catch (IOException e) {
                         // TCP wire error throws IOException
                         // TODO error handling
