@@ -28,19 +28,45 @@ public class Http11Processor {
 
     private final OutputStream out;
 
-    public Http11Processor(InputStream in, OutputStream out) {
+    private final FileResolver fileResolver;
+
+    public Http11Processor(InputStream in, OutputStream out, FileResolver fileResolver) {
         this.in = in;
         this.out = out;
+        this.fileResolver = fileResolver;
     }
 
     public void process() throws IOException {
         Http11Request request = readRequest();
 
-        sendResponse(new File("/Users/kensuke/tmp/htdocs/top.htm"));
+        File file = fileResolver.findFile(request.path());
+        if (file == null || !file.exists() || !file.isFile()) {
+            sendError(404);
+            return;
+        }
+        sendResponse(file);
+    }
+
+    private void sendError(int statusCode) throws IOException {
+        var responseHeaders = new StringBuilder();
+
+        responseHeaders.append("HTTP/1.1 ");
+        switch (statusCode) {
+        case 200:
+            responseHeaders.append("200 OK");
+            break;
+        case 404:
+            responseHeaders.append("404 Not Found");
+            break;
+        }
+        responseHeaders.append(CRLF);
+        responseHeaders.append(CRLF);
+
+        out.write(responseHeaders.toString().getBytes(StandardCharsets.UTF_8));
     }
 
     private void sendResponse(File file) throws IOException {
-        String contentType = "text/html"; // DEBUG
+        String contentType = ContentTypeRegistry.getContentType(file);
 
         // レスポンスヘッダーを構築する
         var responseHeaders = new StringBuilder();
